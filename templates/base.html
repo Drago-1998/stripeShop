@@ -8,11 +8,114 @@
     <title>{% block title %}Home{% endblock title %}</title>
 </head>
 <body>
+<div>
+    <h2>Cart</h2>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="cart_body">
+        {% for cart_item in cart %}
+            <tr>
+                <td>{{ cart_item.id }}</td>
+                <td>{{ cart_item.name }}</td>
+                <td>{{ cart_item.price }}</td>
+                <td>{{ cart_item.quantity }}</td>
+                <td>
+                    <button class="add_to_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
+                        +
+                    </button>
+                    <button class="sub_from_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
+                        -
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% block content %}
 {% endblock content %}
 
 {% block extra_js %}
 
 {% endblock extra_js %}
+<script>
+    let addItemToCart = document.getElementsByClassName('add_to_cart_btn')
+    let subItemFromCart = document.getElementsByClassName('sub_from_cart_btn')
+
+    for (let addElem of addItemToCart) {
+        addElem.addEventListener('click', function (e) {
+            // Create a new Checkout Session using the server-side endpoint
+            // Redirect to Stripe Session Checkout
+            fetch(`/cart/add/${e.target.getAttribute('data-item-id')}/`, {method: 'GET'})
+                .then(response => response.json())
+                .then(data => updateCartBody(data.cart))
+        });
+    }
+
+    for (let subElem of subItemFromCart) {
+        subElem.addEventListener('click', function (e) {
+            // Create a new Checkout Session using the server-side endpoint
+            // Redirect to Stripe Session Checkout
+            fetch(`/cart/sub/${e.target.getAttribute('data-item-id')}/`, {method: 'GET'})
+                .then(response => response.json())
+                .then(data => updateCartBody(data.cart))
+        });
+    }
+
+    function updateCartBody(cartData) {
+        let cartBody = document.getElementById('cart_body')
+        let _template = ``
+        for (let CartItem of cartData) {
+            _template += `
+            <tr>
+                <td>${CartItem.id}</td>
+                <td>${CartItem.name}</td>
+                <td>${CartItem.price}</td>
+                <td>${CartItem.quantity}</td>
+                <td>
+                    <button class="add_to_cart_btn" type="button" data-item-id="${CartItem.id}">
+                        +
+                    </button>
+                    <button class="sub_from_cart_btn" type="button" data-item-id="${CartItem.id}">
+                        -
+                    </button>
+                </td>
+            </tr>
+            `
+        }
+
+        cartBody.innerHTML = _template
+
+        for (let addElem of addItemToCart) {
+            if (addElem.matches('#cart_body  tr  td  button'))
+            addElem.addEventListener('click', function (e) {
+                // Create a new Checkout Session using the server-side endpoint
+                // Redirect to Stripe Session Checkout
+                fetch(`/cart/add/${e.target.getAttribute('data-item-id')}/`, {method: 'GET'})
+                    .then(response => response.json())
+                    .then(data => updateCartBody(data.cart))
+            });
+        }
+
+        for (let subElem of subItemFromCart) {
+            if (subElem.matches('#cart_body  tr  td  button'))
+            subElem.addEventListener('click', function (e) {
+                // Create a new Checkout Session using the server-side endpoint
+                // Redirect to Stripe Session Checkout
+                fetch(`/cart/sub/${e.target.getAttribute('data-item-id')}/`, {method: 'GET'})
+                    .then(response => response.json())
+                    .then(data => updateCartBody(data.cart))
+            });
+        }
+    }
+</script>
 </body>
 </html>

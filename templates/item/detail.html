@@ -9,6 +9,8 @@
     <p>{{ item.description }}</p>
     <p>{{ item.price }}</p>
     <button id="buy-button">Buy</button>
+    <button class="add_to_cart_btn" type="button" data-item-id="{{ item.id }}">Add to Cart</button>
+    <button class="sub_from_cart_btn" type="button" data-item-id="{{ item.id }}">Sub from Cart</button>
 {% endblock content %}
 
 {% block extra_js %}

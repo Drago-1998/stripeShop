@@ -20,34 +20,12 @@ class Item(models.Model):
         return f'{self.name} - {self.price} $'
 
     def save(self, **kwargs):
-        import stripe
-
-        stripe.api_key = os.environ.get('API_KEY_SK', f'api_key')
+        from order.logic import create_product_in_stripe, update_product_in_stripe
 
         if not self.id:
-            s_product = stripe.Product.create(
-                name=self.name,
-                description=self.description
-            )
-            s_price = stripe.Price.create(
-                unit_amount_decimal=self.price * 100,
-                currency=self.currency,
-                product=s_product.id,
-            )
-            self.stripe_id = s_product.id
-            self.price_id = s_price.id
+            self.stripe_id, self.price_id = create_product_in_stripe(self)
         else:
-            stripe.Product.modify(
-                self.stripe_id,
-                name=self.name,
-                description=self.description
-            )
-            s_price = stripe.Price.create(
-                unit_amount_decimal=self.price * 100,
-                currency=self.currency,
-                product=self.stripe_id,
-            )
-            self.price_id = s_price.id
+            self.price_id = update_product_in_stripe(self)
         super(Item, self).save(**kwargs)
 
     class Meta:
@@ -56,6 +34,13 @@ class Item(models.Model):
 
 
 class ItemToTax(models.Model):
+    """item to Tax bundle"""
     created_at = models.DateTimeField(auto_now_add=True)
-    item = models.ForeignKey('Item', verbose_name='Item (Product)', on_delete=models.CASCADE)
-    tax = models.ForeignKey('other.Tax', verbose_name='Tax', on_delete=models.PROTECT)
+    item = models.ForeignKey('Item',
+                             verbose_name='Item (Product)',
+                             on_delete=models.CASCADE,
+                             related_name='taxes_bundles')
+    tax = models.ForeignKey('other.Tax',
+                            verbose_name='Tax',
+                            on_delete=models.PROTECT,
+                            related_name='items_bundles')

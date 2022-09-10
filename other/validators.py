@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 
 
-def discount_percent_off_validator(value: float):
+def percent_validator(value: float):
 
     """
     Это функция валидатор для проверки правелносты фильтров
