@@ -1,0 +1,6 @@
+venv/
+staticfiles-cdn/
+__pycache__/
+.idea/
+celerybeat.pid
+celerybeat-schedule

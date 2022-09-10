@@ -1,0 +1,25 @@
+version: "3.9"
+
+
+services:
+  django:
+    build: .
+    container_name: django
+    env_file:
+      - .env.dev
+    command: bash -c "python3 manage.py migrate --run-syncdb && python3 manage.py initadmin && python3 manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/usr/src/stripeShop/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pg_db
+  pg_db:
+    image: postgres:11.0-alpine
+    container_name: pg_db
+    env_file:
+      - .env.dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+volumes:
+  pgdata:

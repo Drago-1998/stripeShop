@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+
+{% endblock extra_css %}
+
+{% block content %}
+    <h1>Products</h1>
+    {% for item in items %}
+        <div>
+            <h2>{{ item.name }}</h2>
+            <h2>{{ item.price }}</h2>
+            <a href="{% url 'item_detail' item.id %}">Read more</a>
+        </div>
+    {% empty %}
+        <h2>We have run out of goods (</h2>
+    {% endfor %}
+{% endblock content %}
+
+{% block extra_js %}
+
+{% endblock extra_js %}
