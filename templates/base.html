@@ -70,21 +70,21 @@
         });
     }
 
-    function updateCartBody(cartData) {
+    function updateCartBody(cartItems) {
         let cartBody = document.getElementById('cart_body')
         let _template = ``
-        for (let CartItem of cartData) {
+        for (let cartItem of cartItems) {
             _template += `
             <tr>
-                <td>${CartItem.id}</td>
-                <td>${CartItem.name}</td>
-                <td>${CartItem.price}</td>
-                <td>${CartItem.quantity}</td>
+                <td>${cartItem.id}</td>
+                <td>${cartItem.name}</td>
+                <td>${cartItem.price}</td>
+                <td>${cartItem.quantity}</td>
                 <td>
-                    <button class="add_to_cart_btn" type="button" data-item-id="${CartItem.id}">
+                    <button class="add_to_cart_btn" type="button" data-item-id="${cartItem.id}">
                         +
                     </button>
-                    <button class="sub_from_cart_btn" type="button" data-item-id="${CartItem.id}">
+                    <button class="sub_from_cart_btn" type="button" data-item-id="${cartItem.id}">
                         -
                     </button>
                 </td>

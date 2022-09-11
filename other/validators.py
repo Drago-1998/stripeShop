@@ -3,11 +3,7 @@ from django.core.exceptions import ValidationError
 
 def percent_validator(value: float):
 
-    """
-    Это функция валидатор для проверки правелносты фильтров
-    :param value:
-    :return:
-    """
+    """Percent can be in range 0.1, 100"""
 
     if value < 0.1:
         ValidationError(

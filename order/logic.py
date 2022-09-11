@@ -55,45 +55,6 @@ def sub_item_in_cart(cart: dict, item_id: int) -> dict:
         raise KeyError('Item(id=%d) not found in Cart' % item_id)
 
 
-def create_product_in_stripe(item_obj: Item) -> tuple[int, int]:
-    """Create Product and Price in Stripe and return their ids"""
-    import stripe
-
-    stripe.api_key = os.environ.get('API_KEY_SK', f'api_key')
-
-    s_product = stripe.Product.create(
-        name=item_obj.name,
-        description=item_obj.description
-    )
-    s_price = stripe.Price.create(
-        unit_amount_decimal=item_obj.price * 100,
-        currency=item_obj.currency,
-        product=s_product.id,
-    )
-
-    return s_product.id, s_price.id
-
-
-def update_product_in_stripe(item_obj: Item) -> int:
-    """Update Product and Create Price in Stripe and return price id"""
-    import stripe
-
-    stripe.api_key = os.environ.get('API_KEY_SK', f'api_key')
-
-    stripe.Product.modify(
-        item_obj.stripe_id,
-        name=item_obj.name,
-        description=item_obj.description
-    )
-    s_price = stripe.Price.create(
-        unit_amount_decimal=item_obj.price * 100,
-        currency=item_obj.currency,
-        product=item_obj.stripe_id,
-    )
-
-    return s_price.id
-
-
 def cart_items_info(cart: dict) -> list[dict[str, Any]]:
     """Get Item from database for cart"""
     items = Item.objects.filter(id__in=(

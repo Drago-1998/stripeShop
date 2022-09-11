@@ -2,17 +2,14 @@ import os
 
 from django.db import models
 
+from payment.constants import CURRENCY_CHOICES
+
 
 class Item(models.Model):
-    CURRENCY_CHOICES = (
-        ('usd', 'US dollars'),
-        ('rub', 'Russian rubles')
-    )
-
     name = models.CharField(verbose_name='Name', max_length=255)
     description = models.TextField(verbose_name='Description')
     price = models.DecimalField(verbose_name='Price', max_digits=15, decimal_places=2)
-    currency = models.CharField(verbose_name='Currency', max_length=8, default='usd', choices=CURRENCY_CHOICES)
+    currency = models.CharField(verbose_name='Currency', max_length=3, default='usd', choices=CURRENCY_CHOICES)
     stripe_id = models.CharField(verbose_name='StripeId', max_length=255, blank=True, null=True)
     price_id = models.CharField(verbose_name='StripeId', max_length=255, blank=True, null=True)
 
@@ -20,7 +17,7 @@ class Item(models.Model):
         return f'{self.name} - {self.price} $'
 
     def save(self, **kwargs):
-        from order.logic import create_product_in_stripe, update_product_in_stripe
+        from item.logic import create_product_in_stripe, update_product_in_stripe
 
         if not self.id:
             self.stripe_id, self.price_id = create_product_in_stripe(self)
