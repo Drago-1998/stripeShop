@@ -10,32 +10,111 @@
 <body>
 <div>
     <h2>Cart</h2>
+    <h3>US Dollars</h3>
     <table border="1">
         <thead>
         <tr>
             <th>#</th>
             <th>Name</th>
-            <th>Price</th>
+            <th>Self Price</th>
+            <th>Price with Taxes</th>
             <th>Quantity</th>
+            <th>Total</th>
             <th>Actions</th>
         </tr>
         </thead>
-        <tbody id="cart_body">
+        <tbody id="cart_body_usd">
         {% for cart_item in cart %}
-            <tr>
-                <td>{{ cart_item.id }}</td>
-                <td>{{ cart_item.name }}</td>
-                <td>{{ cart_item.price }}</td>
-                <td>{{ cart_item.quantity }}</td>
-                <td>
-                    <button class="add_to_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
-                        +
-                    </button>
-                    <button class="sub_from_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
-                        -
-                    </button>
-                </td>
-            </tr>
+            {% if cart_item.currency == 'usd' %}
+                <tr>
+                    <td>{{ cart_item.id }}</td>
+                    <td>{{ cart_item.name }}</td>
+                    <td>{{ cart_item.price }}$</td>
+                    <td>{{ cart_item.price_with_taxes }}$</td>
+                    <td>{{ cart_item.quantity }}</td>
+                    <td>{{ cart_item.total }}$</td>
+                    <td>
+                        <button class="add_to_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
+                            +
+                        </button>
+                        <button class="sub_from_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
+                            -
+                        </button>
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+    <h3>Russian Rubles</h3>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Self Price</th>
+            <th>Price with Taxes</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="cart_body_rub">
+        {% for cart_item in cart %}
+            {% if cart_item.currency == 'rub' %}
+                <tr>
+                    <td>{{ cart_item.id }}</td>
+                    <td>{{ cart_item.name }}</td>
+                    <td>{{ cart_item.price }}₽</td>
+                    <td>{{ cart_item.price_with_taxes }}₽</td>
+                    <td>{{ cart_item.quantity }}</td>
+                    <td>{{ cart_item.total }}₽</td>
+                    <td>
+                        <button class="add_to_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
+                            +
+                        </button>
+                        <button class="sub_from_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
+                            -
+                        </button>
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+    <h3>Promo Codes</h3>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Self Price</th>
+            <th>Price with Taxes</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="cart_body_rub">
+        {% for cart_item in cart %}
+            {% if cart_item.currency == 'rub' %}
+                <tr>
+                    <td>{{ cart_item.id }}</td>
+                    <td>{{ cart_item.name }}</td>
+                    <td>{{ cart_item.price }}₽</td>
+                    <td>{{ cart_item.price_with_taxes }}₽</td>
+                    <td>{{ cart_item.quantity }}</td>
+                    <td>{{ cart_item.total }}₽</td>
+                    <td>
+                        <button class="add_to_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
+                            +
+                        </button>
+                        <button class="sub_from_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
+                            -
+                        </button>
+                    </td>
+                </tr>
+            {% endif %}
         {% endfor %}
         </tbody>
     </table>
@@ -79,7 +158,9 @@
                 <td>${cartItem.id}</td>
                 <td>${cartItem.name}</td>
                 <td>${cartItem.price}</td>
+                <td>${cartItem.price_with_taxes}</td>
                 <td>${cartItem.quantity}</td>
+                <td>${cartItem.total}</td>
                 <td>
                     <button class="add_to_cart_btn" type="button" data-item-id="${cartItem.id}">
                         +
@@ -96,24 +177,24 @@
 
         for (let addElem of addItemToCart) {
             if (addElem.matches('#cart_body  tr  td  button'))
-            addElem.addEventListener('click', function (e) {
-                // Create a new Checkout Session using the server-side endpoint
-                // Redirect to Stripe Session Checkout
-                fetch(`/cart/add/${e.target.getAttribute('data-item-id')}/`, {method: 'GET'})
-                    .then(response => response.json())
-                    .then(data => updateCartBody(data.cart))
-            });
+                addElem.addEventListener('click', function (e) {
+                    // Create a new Checkout Session using the server-side endpoint
+                    // Redirect to Stripe Session Checkout
+                    fetch(`/cart/add/${e.target.getAttribute('data-item-id')}/`, {method: 'GET'})
+                        .then(response => response.json())
+                        .then(data => updateCartBody(data.cart))
+                });
         }
 
         for (let subElem of subItemFromCart) {
             if (subElem.matches('#cart_body  tr  td  button'))
-            subElem.addEventListener('click', function (e) {
-                // Create a new Checkout Session using the server-side endpoint
-                // Redirect to Stripe Session Checkout
-                fetch(`/cart/sub/${e.target.getAttribute('data-item-id')}/`, {method: 'GET'})
-                    .then(response => response.json())
-                    .then(data => updateCartBody(data.cart))
-            });
+                subElem.addEventListener('click', function (e) {
+                    // Create a new Checkout Session using the server-side endpoint
+                    // Redirect to Stripe Session Checkout
+                    fetch(`/cart/sub/${e.target.getAttribute('data-item-id')}/`, {method: 'GET'})
+                        .then(response => response.json())
+                        .then(data => updateCartBody(data.cart))
+                });
         }
     }
 </script>
