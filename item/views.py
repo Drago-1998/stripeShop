@@ -6,13 +6,15 @@ from item.models import Item
 
 
 class ItemListView(ListView):
+    """Page for items list and this is Home page of site"""
     model = Item
     context_object_name = 'items'
     template_name = 'item/list.html'
-    paginate_by = 20
+    paginate_by = 100
 
 
 class ItemDetailView(DetailView):
+    """Item Page with all information"""
     model = Item
     template_name = 'item/detail.html'
     context_object_name = 'item'

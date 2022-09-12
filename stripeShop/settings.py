@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zi7b^i+!1x=0kzboeqefupv-y1b)*a88n8-#cit%1x#rdukp$='
+SECRET_KEY = os.environ.get('PROJECT_SECRET_KEY', f'stripe_shop123')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -65,7 +65,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'stripeShop.custom_context_processor.cart_context'
+                'stripeShop.custom_context_processors.cart_context',
+                'stripeShop.custom_context_processors.promo_context'
             ],
         },
     },

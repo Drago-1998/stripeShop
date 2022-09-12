@@ -9,6 +9,10 @@
 </head>
 <body>
 <div>
+    <ul>
+        <li><a href="{% url 'home' %}">Products page</a></li>
+        <li><a href="{% url 'order_list' %}">Orders page</a></li>
+    </ul>
     <h2>Cart</h2>
     <h3>US Dollars</h3>
     <table border="1">
@@ -23,7 +27,7 @@
             <th>Actions</th>
         </tr>
         </thead>
-        <tbody id="cart_body_usd">
+        <tbody class="card_body" id="cart_body_usd">
         {% for cart_item in cart %}
             {% if cart_item.currency == 'usd' %}
                 <tr>
@@ -45,6 +49,11 @@
             {% endif %}
         {% endfor %}
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7"><a href="{% url 'create_order_from_cart' 'usd' %}">Create order</a></td>
+            </tr>
+        </tfoot>
     </table>
     <h3>Russian Rubles</h3>
     <table border="1">
@@ -59,7 +68,7 @@
             <th>Actions</th>
         </tr>
         </thead>
-        <tbody id="cart_body_rub">
+        <tbody class="card_body" id="cart_body_rub">
         {% for cart_item in cart %}
             {% if cart_item.currency == 'rub' %}
                 <tr>
@@ -81,42 +90,44 @@
             {% endif %}
         {% endfor %}
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7"><a href="{% url 'create_order_from_cart' 'usd' %}">Create order</a></td>
+            </tr>
+        </tfoot>
     </table>
     <h3>Promo Codes</h3>
     <table border="1">
         <thead>
         <tr>
-            <th>#</th>
+            <th>Code</th>
             <th>Name</th>
-            <th>Self Price</th>
-            <th>Price with Taxes</th>
-            <th>Quantity</th>
-            <th>Total</th>
+            <th>Percent Off</th>
             <th>Actions</th>
         </tr>
         </thead>
-        <tbody id="cart_body_rub">
-        {% for cart_item in cart %}
-            {% if cart_item.currency == 'rub' %}
-                <tr>
-                    <td>{{ cart_item.id }}</td>
-                    <td>{{ cart_item.name }}</td>
-                    <td>{{ cart_item.price }}₽</td>
-                    <td>{{ cart_item.price_with_taxes }}₽</td>
-                    <td>{{ cart_item.quantity }}</td>
-                    <td>{{ cart_item.total }}₽</td>
-                    <td>
-                        <button class="add_to_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
-                            +
-                        </button>
-                        <button class="sub_from_cart_btn" type="button" data-item-id="{{ cart_item.id }}">
-                            -
-                        </button>
-                    </td>
-                </tr>
-            {% endif %}
+        <tbody id="cart_body_promo">
+        {% for promo in promos %}
+            <tr>
+                <td>{{ promo.code }}</td>
+                <td>{{ promo.name }}</td>
+                <td>{{ promo.percent_off }} %</td>
+                <td>
+                    <button class="deactivate_promo_btn" type="button" onclick="deactivatePromo('{{ promo.code }}')">
+                        Deactivate
+                    </button>
+                </td>
+            </tr>
         {% endfor %}
         </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="3"><input type="text" id="add_promo_input"></td>
+            <td>
+                <button type="button" onclick="activatePromo()" id="add_promo_button">Add Promo</button>
+            </td>
+        </tr>
+        </tfoot>
     </table>
 </div>
 {% block content %}
@@ -149,34 +160,105 @@
         });
     }
 
-    function updateCartBody(cartItems) {
-        let cartBody = document.getElementById('cart_body')
+    function activatePromo() {
+        let promoInput = document.getElementById('add_promo_input')
+        if (promoInput.value !== '') {
+            fetch(`/promo/activate/${promoInput.value}/`, {method: 'GET'})
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'Ok') {
+                        updatePromoBody(data.promo)
+                    } else alert(data.message)
+                })
+        }
+        promoInput.value = ''
+    }
+
+    function deactivatePromo(promoCode) {
+        fetch(`/promo/deactivate/${promoCode}/`, {method: 'GET'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'Ok') {
+                    updatePromoBody(data.promo)
+                } else alert(data.message)
+            })
+    }
+
+    function updatePromoBody(promos) {
+        console.log(promos)
+        let promoBody = document.getElementById('cart_body_promo')
         let _template = ``
-        for (let cartItem of cartItems) {
+        for (let promo_code in promos) {
+            let promo = promos[promo_code]
             _template += `
             <tr>
-                <td>${cartItem.id}</td>
-                <td>${cartItem.name}</td>
-                <td>${cartItem.price}</td>
-                <td>${cartItem.price_with_taxes}</td>
-                <td>${cartItem.quantity}</td>
-                <td>${cartItem.total}</td>
+                <td>${promo.code}</td>
+                <td>${promo.name}</td>
+                <td>${promo.percent_off} %</td>
                 <td>
-                    <button class="add_to_cart_btn" type="button" data-item-id="${cartItem.id}">
-                        +
-                    </button>
-                    <button class="sub_from_cart_btn" type="button" data-item-id="${cartItem.id}">
-                        -
+                    <button class="deactivate_promo_btn" type="button" onclick="deactivatePromo('${promo.code}')">
+                        Deactivate
                     </button>
                 </td>
             </tr>
             `
         }
 
-        cartBody.innerHTML = _template
+        promoBody.innerHTML = _template
+    }
+
+    function updateCartBody(cartItems) {
+        let cartBodyUSD = document.getElementById('cart_body_usd')
+        let cartBodyRUB = document.getElementById('cart_body_rub')
+        let _template_usd = ``
+        let _template_rub = ``
+        for (let cartItem of cartItems) {
+            if (cartItem.currency === 'usd') {
+                _template_usd += `
+                <tr>
+                    <td>${cartItem.id}</td>
+                    <td>${cartItem.name}</td>
+                    <td>${cartItem.price}$</td>
+                    <td>${cartItem.price_with_taxes}$</td>
+                    <td>${cartItem.quantity}</td>
+                    <td>${cartItem.total}$</td>
+                    <td>
+                        <button class="add_to_cart_btn" type="button" data-item-id="${cartItem.id}">
+                            +
+                        </button>
+                        <button class="sub_from_cart_btn" type="button" data-item-id="${cartItem.id}">
+                            -
+                        </button>
+                    </td>
+                </tr>
+                `
+            } else if (cartItem.currency === 'rub') {
+                _template_rub += `
+                <tr>
+                    <td>${cartItem.id}</td>
+                    <td>${cartItem.name}</td>
+                    <td>${cartItem.price}₽</td>
+                    <td>${cartItem.price_with_taxes}₽</td>
+                    <td>${cartItem.quantity}</td>
+                    <td>${cartItem.total}₽</td>
+                    <td>
+                        <button class="add_to_cart_btn" type="button" data-item-id="${cartItem.id}">
+                            +
+                        </button>
+                        <button class="sub_from_cart_btn" type="button" data-item-id="${cartItem.id}">
+                            -
+                        </button>
+                    </td>
+                </tr>
+                `
+            }
+        }
+
+        cartBodyRUB.innerHTML = _template_rub
+        cartBodyUSD.innerHTML = _template_usd
 
         for (let addElem of addItemToCart) {
-            if (addElem.matches('#cart_body  tr  td  button'))
+            if (addElem.matches('tbody  tr  td  button'))
                 addElem.addEventListener('click', function (e) {
                     // Create a new Checkout Session using the server-side endpoint
                     // Redirect to Stripe Session Checkout
@@ -187,7 +269,7 @@
         }
 
         for (let subElem of subItemFromCart) {
-            if (subElem.matches('#cart_body  tr  td  button'))
+            if (subElem.matches('tbody  tr  td  button'))
                 subElem.addEventListener('click', function (e) {
                     // Create a new Checkout Session using the server-side endpoint
                     // Redirect to Stripe Session Checkout

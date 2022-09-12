@@ -1,11 +1,10 @@
-import os
-
 from django.db import models
 
 from payment.constants import CURRENCY_CHOICES
 
 
 class Item(models.Model):
+    """Items model (Products)"""
     name = models.CharField(verbose_name='Name', max_length=255)
     description = models.TextField(verbose_name='Description')
     price = models.DecimalField(verbose_name='Price', max_digits=15, decimal_places=2)

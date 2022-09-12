@@ -2,7 +2,6 @@ from django.db import models
 
 from other.constants import TAX_TYPE_CHOICES, DURATION_CHOICES
 from other.validators import percent_validator
-from payment.constants import CURRENCY_CHOICES
 
 
 class DiscountCoupon(models.Model):
@@ -21,7 +20,7 @@ class DiscountCoupon(models.Model):
     def save(self, **kwargs):
         from other.logic import create_coupon_in_stripe
 
-        self.price_id = create_coupon_in_stripe(self)
+        self.stripe_id = create_coupon_in_stripe(self)
         super(DiscountCoupon, self).save(**kwargs)
 
     class Meta:
@@ -66,7 +65,7 @@ class Tax(models.Model):
     def save(self, **kwargs):
         from other.logic import create_tax_in_stripe
 
-        self.price_id = create_tax_in_stripe(self)
+        self.stripe_id = create_tax_in_stripe(self)
         super(Tax, self).save(**kwargs)
 
     class Meta:

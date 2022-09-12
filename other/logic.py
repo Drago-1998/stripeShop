@@ -1,4 +1,7 @@
 import os
+from typing import Union
+
+from django.http import JsonResponse
 
 from other.models import Tax, DiscountCoupon, PromoCode
 
@@ -60,10 +63,45 @@ def create_promo_code_in_stripe(promo_code_obj: PromoCode) -> str:
             active=False,
         )
 
-    s_promo_code = stripe.Coupon.create(
+    s_promo_code = stripe.PromotionCode.create(
         coupon=promo_code_obj.coupon.stripe_id,
         code=promo_code_obj.code,
         active=promo_code_obj.active,
     )
 
     return s_promo_code.id
+
+
+def add_promo_code(promos: Union[dict, bool], promo_code: str) -> Union[dict, JsonResponse]:
+    """Add Promo Code in Cart or return error response"""
+    if not promos:
+        promos = {}
+
+    if promo_code in promos:
+        return JsonResponse({
+            'status': 'Error',
+            'message': 'This promo code is already in your cart'
+        })
+    try:
+        promo = PromoCode.objects.select_related('coupon')\
+            .get(code=promo_code, active=True)
+        promos[promo_code] = {
+            'id': promo.id,
+            'coupon_id': promo.coupon_id,
+            'code': promo.code,
+            'percent_off': promo.coupon.percent_off,
+            'name': promo.coupon.name,
+        }
+    except PromoCode.DoesNotExist:
+        return JsonResponse({
+            'status': 'Error',
+            'message': 'This promo code was not found or is no longer active'
+        })
+
+    return promos
+
+
+def delete_promo_code(promos: dict, promo_code: str) -> dict:
+    """Delete Promo Code from Cart or return error response"""
+    del promos[promo_code]
+    return promos

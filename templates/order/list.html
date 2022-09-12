@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+
+{% endblock extra_css %}
+
+{% block content %}
+    <h1>Orders</h1>
+    {% for order in orders %}
+        <div>
+            <h2>Order #{{ order.id }}</h2>
+            <h2>Total {{ order.total_with_promos }}</h2>
+            <a href="{% url 'order_detail' order.id %}">Read more</a>
+        </div>
+    {% empty %}
+        <h2>Orders not found</h2>
+    {% endfor %}
+{% endblock content %}
+
+{% block extra_js %}
+
+{% endblock extra_js %}
