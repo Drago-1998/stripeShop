@@ -55,7 +55,8 @@ class CreateOrderFromCart(View):
         order = create_order_from_cart(filtered_cart, request.session.get('promos', {}))
         for cart_item in cart:
             if cart_item['currency'] == currency:
-                del _cart[cart_item['id']]
+                del _cart[str(cart_item['id'])]
+        request.session['cart'] = _cart
         return redirect(reverse('order_detail', kwargs={'pk': order.id}))
 
 
